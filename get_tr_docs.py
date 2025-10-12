@@ -39,7 +39,7 @@ parser = argparse.ArgumentParser(description="Download Trade Republic docs, gene
 parser.add_argument("--nodl", "--skip-doc-download", help="Skip document download from Trade Republic", action="store_true")
 parser.add_argument("--skipdel", "--skip-dl-folder-deletion", help="Skip deletion of existing local download folder", action="store_true")
 parser.add_argument("--nocsv", "--skip-csv-generation", help="Skip generation of CSV for import into Portfolio Performance", action="store_true")
-parser.add_argument("--noupload", "--skip-nextcloud-upload", help="Skip upload of files to Nextcloud", action="store_true")
+parser.add_argument("--noupload", "--skip-nextcloud-upload", help="Skip folder creation in and upload of files to Nextcloud.", action="store_true")
 args = parser.parse_args()
 
 
