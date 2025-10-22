@@ -12,6 +12,7 @@ Author: Andreas Hering, 2025
 
 import argparse
 import subprocess
+import sys
 from nc_py_api import Nextcloud
 import os
 from pathlib import Path
@@ -92,6 +93,9 @@ def download_docs():
         tr_days_to_download,
         tr_doc_download_path,
     ]
+    # On Windows, shell=True if needed; on Linux, leave it False.
+    use_shell = sys.platform.startswith('win')
+    
     dl_docs = subprocess.Popen(
         pytr_dl_docs_args,
         stdin=subprocess.PIPE,
@@ -100,8 +104,9 @@ def download_docs():
         encoding="utf-8",
         text=True,  # Use text mode for input/output
         bufsize=1,  # Line-buffered for reading output line by line
-        shell=True,  # Use the shell to execute the command
+        shell=use_shell,  # Use the shell to execute the command
     )
+    
     # Read line from command line input (the code)
     user_code = input("Enter verification code: ")
 
