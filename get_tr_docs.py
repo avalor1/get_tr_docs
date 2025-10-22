@@ -31,7 +31,7 @@ tr_days_to_download = os.getenv("TR_DAYS_TO_DOWNLOAD")  # use 0 for all
 tr_doc_download_path = os.getenv("TR_DOC_DOWNLOAD_PATH")
 nc_auth_user = os.getenv("NC_AUTH_USER")
 nc_auth_pass = os.getenv("NC_AUTH_PASS")
-nc_tr_document_folder = tr_doc_download_path
+nc_tr_document_folder = os.getenv("NC_TR_DOCUMENT_FOLDER")
 nc_url = os.getenv("NC_URL")
 ###
 
@@ -95,7 +95,7 @@ def download_docs():
     ]
     # On Windows, shell=True if needed; on Linux, leave it False.
     use_shell = sys.platform.startswith('win')
-    
+
     dl_docs = subprocess.Popen(
         pytr_dl_docs_args,
         stdin=subprocess.PIPE,
