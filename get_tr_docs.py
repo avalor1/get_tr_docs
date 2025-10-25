@@ -79,6 +79,8 @@ def remove_existing_dl_folder():
     else:
         print("All good, no folder found. Starting download.")
 
+# On Windows, set shell=True if needed; on Linux, leave it False.
+use_shell = sys.platform.startswith('win')
 
 # Download documents from Trade Republic
 def download_docs():
@@ -93,8 +95,6 @@ def download_docs():
         tr_days_to_download,
         tr_doc_download_path,
     ]
-    # On Windows, shell=True if needed; on Linux, leave it False.
-    use_shell = sys.platform.startswith('win')
 
     dl_docs = subprocess.Popen(
         pytr_dl_docs_args,
@@ -142,7 +142,7 @@ def create_pp_csv():
         stdout=subprocess.PIPE,
         text=True,  # Use text mode for input/output
         bufsize=1,  # Line-buffered for reading output line by line
-        shell=True,  # Use the shell to execute the command
+        shell=use_shell,  # Use the shell to execute the command
     )
     # wait for popen to complete and write the data (asynchronous execution).
     # Also save returned info into variables for eventual debug.
@@ -165,10 +165,18 @@ def create_nextcloud_connection():
 # TODO: also check if subfolders need to be created even if main folder already exists
 def create_nextcloud_folders():
     nc = create_nextcloud_connection()
-    # Get all nextcloud directories recursively
-    search_result = nc.files.find(["eq", "name", nc_tr_document_folder])
-    ## debug
-    # print(search_result)
+    
+    # list_main_folder = nc.files.by_path(nc_tr_document_folder)
+    # #list_main_folder = nc.files.listdir("finanzen")
+    # nc.files.makedirs(nc_tr_document_folder, exist_ok=True)
+    # print("breakpoint after listfiles")
+
+
+    # Get document folder for tr downloads in nextcloud
+    #search_result = nc.files.find(["eq", "name", os.path.basename(nc_tr_document_folder)])
+    search_result = nc.files.by_path(nc_tr_document_folder)
+    #search_result = []
+
     if not search_result:
         if nc_tr_document_folder not in search_result:
             print("Creating upload target folders!")
@@ -192,8 +200,9 @@ def create_nextcloud_folders():
 # Upload files into corresponding folders
 def upload_docs_to_nextcloud():
     nc = create_nextcloud_connection()
+    import json
     ## debug: print nextcloud capabilities (needs json library 'dumps')
-    # pretty_capabilities = dumps(nc.capabilities, indent=4, sort_keys=True)
+    # pretty_capabilities = json.dumps(nc.capabilities, indent=4, sort_keys=True)
     # print(pretty_capabilities)
     print(f"Uploading files and folders from '{tr_doc_download_path}'")
     for root, dirs, files in os.walk(tr_doc_download_path):
