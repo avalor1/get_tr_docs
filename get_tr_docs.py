@@ -79,6 +79,8 @@ def remove_existing_dl_folder():
     else:
         print("All good, no folder found. Starting download.")
 
+# On Windows, shell=True if needed; on Linux, leave it False.
+use_shell = sys.platform.startswith('win')
 
 # Download documents from Trade Republic
 def download_docs():
@@ -93,8 +95,6 @@ def download_docs():
         tr_days_to_download,
         tr_doc_download_path,
     ]
-    # On Windows, shell=True if needed; on Linux, leave it False.
-    use_shell = sys.platform.startswith('win')
 
     dl_docs = subprocess.Popen(
         pytr_dl_docs_args,
@@ -142,7 +142,7 @@ def create_pp_csv():
         stdout=subprocess.PIPE,
         text=True,  # Use text mode for input/output
         bufsize=1,  # Line-buffered for reading output line by line
-        shell=True,  # Use the shell to execute the command
+        shell=use_shell,  # Use the shell to execute the command
     )
     # wait for popen to complete and write the data (asynchronous execution).
     # Also save returned info into variables for eventual debug.
