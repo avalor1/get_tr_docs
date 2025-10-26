@@ -7,5 +7,5 @@ It is configured via a .env file and optional parameters.
 
 Usage:
 ```bash
-get_tr_docs.py [--help] [--nodl] [--skipdel] [--nocsv] [--noupload]
+get_tr_docs.py [--help] [--nodl] [--skipdel] [--nocsv] [--noupload] [--ffc]
 ```

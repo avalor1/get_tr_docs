@@ -63,6 +63,12 @@ parser.add_argument(
     help="Skip folder creation in and upload of files to Nextcloud.",
     action="store_true",
 )
+parser.add_argument(
+    "--ffc",
+    "--force-nc-folder-create",
+    help="Force folder creation in Nextcloud.",
+    action="store_true",
+)
 args = parser.parse_args()
 
 
@@ -79,7 +85,7 @@ def remove_existing_dl_folder():
     else:
         print("All good, no folder found. Starting download.")
 
-# On Windows, shell=True if needed; on Linux, leave it False.
+# On Windows, set shell=True if needed; on Linux, leave it False.
 use_shell = sys.platform.startswith('win')
 
 # Download documents from Trade Republic
@@ -148,9 +154,6 @@ def create_pp_csv():
     # Also save returned info into variables for eventual debug.
     stdout, stderr = pp_csv_gen.communicate()
     print("CSV generation process exited with return code:", pp_csv_gen.returncode)
-    # print(pp_csv_gen.args)
-    # print(stderr)
-    # print(stdout)
 
 
 # create nextcloud connection for folder creation and file upload
@@ -165,37 +168,33 @@ def create_nextcloud_connection():
 # TODO: also check if subfolders need to be created even if main folder already exists
 def create_nextcloud_folders():
     nc = create_nextcloud_connection()
-    # Get all nextcloud directories recursively
-    search_result = nc.files.find(["eq", "name", nc_tr_document_folder])
-    ## debug
-    # print(search_result)
-    if not search_result:
+    
+    # Get document folder for tr downloads in nextcloud (Does take while under Linux if nested deeply)
+    search_result = nc.files.find(["eq", "name", os.path.basename(nc_tr_document_folder)])
+
+    if not search_result or args.ffc:
         if nc_tr_document_folder not in search_result:
-            print("Creating upload target folders!")
+            print(f"Creating upload target folders in '{nc_tr_document_folder}'")
             directories = [
                 x for x in Path(tr_doc_download_path).rglob("*") if x.is_dir()
             ]
             for directory in directories:
-                print(f"Creating: {directory}")
-                nc.files.makedirs(str(directory), exist_ok=True)
+                subdirs = directory.parts[1:]
+                nc_subdir_path = os.path.join(nc_tr_document_folder, "/".join(subdirs)).replace("\\","/")
+                print(f"Creating dir: {'/'.join(subdirs)}")
+                nc.files.makedirs(nc_subdir_path, exist_ok=True)
+
+            print("Folder creation successful!") 
+    
     else:
         print("Skip folder creation! Already existing!")
-
-    ## debug
-    # print("Files & folders on the instance for the selected user:")
-    # tr_documents = nc.files.listdir(nc_tr_document_folder)
-    # for obj in tr_documents:
-    #     print(obj.user_path)
-    print("Folder creation successful!")
-
+    
 
 # Upload files into corresponding folders
 def upload_docs_to_nextcloud():
     nc = create_nextcloud_connection()
-    ## debug: print nextcloud capabilities (needs json library 'dumps')
-    # pretty_capabilities = dumps(nc.capabilities, indent=4, sort_keys=True)
-    # print(pretty_capabilities)
-    print(f"Uploading files and folders from '{tr_doc_download_path}'")
+
+    print(f"Uploading files and folders from '{tr_doc_download_path}' to '{nc_tr_document_folder}")
     for root, dirs, files in os.walk(tr_doc_download_path):
         for file_name in files:
             local_file_path = os.path.join(root, file_name)
@@ -206,7 +205,7 @@ def upload_docs_to_nextcloud():
             ).replace("\\", "/")
 
             with open(local_file_path, "rb") as f:
-                print(f"Uploading file {f}")
+                print(f"Uploading file {'/'.join(Path(remote_file_path).parts[4:])}")
                 nc.files.upload_stream(remote_file_path, f)
 
     print("Upload to nextcloud successful!")
