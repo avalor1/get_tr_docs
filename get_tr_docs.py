@@ -173,18 +173,17 @@ def create_nextcloud_folders():
     search_result = nc.files.find(["eq", "name", os.path.basename(nc_tr_document_folder)])
 
     if not search_result or args.ffc:
-        if nc_tr_document_folder not in search_result:
-            print(f"Creating upload target folders in '{nc_tr_document_folder}'")
-            directories = [
-                x for x in Path(tr_doc_download_path).rglob("*") if x.is_dir()
-            ]
-            for directory in directories:
-                subdirs = directory.parts[1:]
-                nc_subdir_path = os.path.join(nc_tr_document_folder, "/".join(subdirs)).replace("\\","/")
-                print(f"Creating dir: {'/'.join(subdirs)}")
-                nc.files.makedirs(nc_subdir_path, exist_ok=True)
+        print(f"Creating upload target folders in '{nc_tr_document_folder}'")
+        directories = [
+            x for x in Path(tr_doc_download_path).rglob("*") if x.is_dir()
+        ]
+        for directory in directories:
+            subdirs = directory.parts[1:]
+            nc_subdir_path = os.path.join(nc_tr_document_folder, "/".join(subdirs)).replace("\\","/")
+            print(f"Creating dir: {'/'.join(subdirs)}")
+            nc.files.makedirs(nc_subdir_path, exist_ok=True)
 
-            print("Folder creation successful!") 
+        print("Folder creation successful!") 
     
     else:
         print("Skip folder creation! Already existing!")
