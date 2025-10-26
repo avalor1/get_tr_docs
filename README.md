@@ -5,7 +5,14 @@ documents from Trade Republic via API, creates a CSV for import into Portfolio P
 and Uploads all of them them into the corresponding folder of your nextcloud instance.
 It is configured via a .env file and optional parameters.
 
-Usage:
+# requirements
+- python
+
+# preparation
+- Inside project folder 
+    - `pip install -r requirements.txt`
+
+# usage:
 ```bash
 get_tr_docs.py [--help] [--nodl] [--skipdel] [--nocsv] [--noupload] [--ffc]
 ```
